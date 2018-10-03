@@ -1,0 +1,256 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf100
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 AppleSymbols;\f2\fmodern\fcharset0 Courier;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \
+\
+
+\b Exercise 21.1: Suggest formal specfications of P, P(i), Q and Q(j) function definition schema and channel structures to cater to each of the five system channel configurations
+\b0 \
+\
+A:\
+\
+Type info\
+Channel c\
+\
+Value\
+	P: Unit -> out c Unit\
+	Q: Unit -> in c Unit\
+	P() 
+\f1 \uc0\u8801 
+\f0  \{P() || Q() | \{x\'85m\}\} P();\
+\
+B:\
+\
+Type Info\
+Channel c[1\'85m]\
+\
+Value\
+	P()
+\f1 \uc0\u8801 
+\f0  || \{P() || Q() x \{1\'85m\}\} P();\
+\
+C:\
+\
+Type Info\
+Channel c\
+\
+Value\
+	P() 
+\f1 \uc0\u8801 
+\f0  || \{P() x \{1\'85m\} || Q() x \{1\'85n\}\}\
+\
+D:\
+\
+Type Info\
+Chanel c[1\'85m]\
+\
+Value \
+	P() 
+\f1 \uc0\u8801 
+\f0  || \{P() x \{1\'85m\} || Q() x \{1\'85n\}\}\
+\
+\
+
+\b 21.2 There are given three behaviours: a producer, a repository, and a consumer. The producer (occasionally) produces entities and delivers them to the repository. The repository accepts producer-manufactured entities and, upon request, hands them on the consumer. The consumer consumes entities by (occasionally) requesting these from the repository. The repository delivers entities in the order in which they were received. The repository can keep at most b entities. Define types of entities and of entity requests (from consumers), two (or three) channels and the four behaviours: producers, repository, consumer and their aggregation into a system behaviour. \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b0 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 {{\NeXTGraphic design.jpg \width11328 \height5078 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}\
+\
+\
+Type Object\
+Chanel pr, rc\
+\
+Value\
+	Producer: Unit -> out pr Object\
+\
+	Producer() 
+\f1 \uc0\u8801 
+\f0  let o = createObject() in pr ! o end; Producer()\
+\
+	Repository: Unit-> in pr Unit\
+\
+	Repository() 
+\f1 \uc0\u8801 
+\f0  let o = pr ? in end let r = rc ? in end in rc ! o end; Repository()\
+\
+	Consumer: Unit-> in out rc Unit\
+\
+	Consumer() 
+\f1 \uc0\u8801 
+\f0  let r = request() in rc! let o = re ? in end Consumer()\
+\
+	System: Producer() || Repository() || Consumer()\
+\
+
+\b 21.3 There are given m + n + 1 behaviours: m producers, p(i), a repository, and n consumers, c(j). Any producer may deposit an entity with the repository, and any consumer may request an entity from the repository. The repository marks every received entity with a unique identity of its producer. the entities delivered to consumers are marked with this identity. The repository otherwise delivers the marked entities in the order of their receipt. Define types of the entities and of entity requests (from consumers), the m channels between producers and the repository, the either n or 2n channels between the repository and the consumers, and the four behaviours: producer, repository, consumer and their combined system. \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b0 \cf0 {{\NeXTGraphic d.jpg \width10387 \height7468 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+\
+\
+Type\
+	Object, requests, ProduceID\
+\
+Value\
+	Producers: p : ProducerIndex -> out pr[p] Unit\
+\
+	producer() 
+\f1 \uc0\u8801 
+\f0  let o = createObject(); let (p,o): (producerIndex, Object()) in pr ! (p,o) end; Producer()\
+\
+	Repository: Unit -> in \{pr [p] | p: ProducerIndex\} in; out \{rc [c] | c: consumerIndex\}\
+\
+	Repository() 
+\f1 \uc0\u8801 
+\f0  let (id, o) = pr[p] ? in end let r = rc [c] ? in end in rc [c] ! (id, o) end; Repository()\
+\
+	Consumer: Unit -> in rc [c] Unit\
+\
+	Consumer() 
+\f1 \uc0\u8801 
+\f0  let r = request() in rc [c] ! r end let (id, o) = rc [c] ? in end; Consumer()\
+\
+	System: Unit -> Unit\
+	\
+	System() 
+\f1 \uc0\u8801 
+\f0  ( || Producer() | x \{1\'85n\}) || Repository() || ( || Consumer() | r: \{1\'85m\})\
+\
+\
+
+\b 21.4  A number of computation processes share a common storage. We see this common storage to record, for distinct locations, a value. We see the computation processes performing the following operations on the shared storage: (i) requesting allocation of new storage locations, (ii) storing (initial) values in these, (iii) updating with, i.e., changing existing values to, new given values at identified, i.e., given, locations; (iv) requesting the value at a given (i.e., identified) location, (v) and requesting the deallocation, i.e., the freeing or removal, of an identified location. We finally allow processes to (vi) pass on location to one another \'97 according to some further unspecified protocol.  Define the type of storages, i.e., of locations and values and their combination into storages. Define the type of channels between computation processes and between these and the storage process \'97 the latter is thus thought of as the only process with \'93keeps\'94, i.e., maintains, the storage. Finally, define the two kinds of behaviours: computation processes which occasionally perform one of the actions (i - vi), and the storage behaviour. 
+\b0 \
+\
+(solution copie from professor)\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 \expnd0\expndtw0\kerning0
+scheme StorageSystemDedicatedChannels =\
+  class\
+    type\
+      Location, Value, ComputeProcessesNumber,\
+      Message == mkQuery(Location) | mkValue(Value) | mkUpdate(Location >< Value) \
+                 | alloc(Value) | mkLocation(Location) | dealloc(Location) | mkError | mkOK\
+                 | mkTransfer(ComputeProcessesNumber, ComputeProcessesNumber, Location),\
+      Cells = Location -m-> Value >< ComputeProcessesNumber\
+    object channels[n:ComputeProcessesNumber] : class channel c:Message end\
+    value\
+      useValue : Value -> Unit,\
+      Compute : ComputeProcessesNumber >< Location-set\
+                -> in \{channels[m].c | m:ComputeProcessesNumber\} out \{channels[m].c | m:ComputeProcessesNumber\}  Unit\
+      Compute(id, myLocations) is\
+        let mkTransfer(from, to, transferredlocation) = channels[id].c? in\
+           Compute(id, myLocations union \{transferredlocation\})\
+        end\
+       |=|\
+        (let initial:Value in\
+          channels[id].c ! alloc(initial);\
+          case channels[id].c? of\
+            mkLocation(newLocation) -> Compute(id, myLocations union \{newLocation\})\
+          end\
+        end\
+       |^|\
+        /* This models that a process only accesses a location it owns. */\
+        (|^| \{channels[id].c ! mkQuery(location);\
+              case channels[id].c? of\
+                mkValue(storedValue) -> useValue(storedValue)\
+              end\
+             | location:Location :- location isin myLocations\})\
+       |^|\
+        let newValue:Value in\
+          |^| \{channels[id].c ! mkUpdate(location, newValue) | location:Location :- location isin myLocations\}\
+        end\
+       |^|\
+        (|^| \{channels[id].c ! dealloc(location) | location:Location :- location isin myLocations\})\
+       |^|\
+        let otherProcess:ComputeProcessesNumber in\
+          (|^| \{channels[id].c ! mkTransfer(id, otherProcess, location)\
+                | location:Location :- location isin myLocations\})\
+        end);\
+        Compute(id, myLocations),\
+      /* If compute processes only access locations they own and Storage operates correctly, then any location in a request \
+         from a compute processes will be in use. */\
+      Storage : Location-set >< Cells -> in \{channels[m].c | m:ComputeProcessesNumber\} out \{channels[m].c | m:ComputeProcessesNumber\}  Unit\
+      Storage(free, inUse) is\
+        |=| \{case channels[m].c? of\
+               mkQuery(location) ->\
+                 let (valueStored, owner) = inUse(location) in\
+                   channels[m].c ! mkValue(valueStored) \
+                 end; Storage(free, inUse),\
+               mkUpdate(location, valueToStore) ->\
+                 let (valueStored, owner) = inUse(location) in\
+                   Storage(free, inUse !! [location +> (valueToStore, owner)])\
+                 end,\
+               mkTransfer(from, to, transferredLocation) ->\
+                 let (valueStored, owner) = inUse(transferredLocation) in\
+                   channels[to].c ! mkTransfer(from, to, transferredLocation);\
+                   Storage(free, inUse !! [transferredLocation +> (valueStored, to)])\
+                 end,\
+               alloc(initialValue) ->\
+                 if free = \{\}\
+                 then channels[m].c ! mkError; Storage(free, inUse)\
+                 else let toUse: \{|x:Location :- x isin free|\} in\
+                        channels[m].c ! mkLocation(toUse); Storage(free \\ \{toUse\}, inUse !! [toUse +> (initialValue, m)])\
+                      end\
+                 end,\
+               dealloc(location) ->\
+                 let (valueStored, owner) = inUse(location) in\
+                   Storage(free union \{location\}, inUse \\ \{location\})\
+                 end\
+             end | m:ComputeProcessesNumber\}\
+  end\
+\
+
+\f0\fs24 \kerning1\expnd0\expndtw0 \
+
+\b 21.7 Define the types of server function catalogues and states, and of client-to-server and server-to-client messages. Also define the system, the client and the server behaviours. \
+\
+
+\b0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+\cf0 {{\NeXTGraphic f.jpg \width10464 \height7257 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}\
+\
+\
+Type 	\
+	Object, Request\
+\
+Channel\
+	cs[1\'85m]\
+\
+Value\
+	Client: Unit -> Unit\
+	Client() 
+\f1 \uc0\u8801 
+\f0  let r = request() in cs end\
+\
+	Server: Unit -> in cs[r] Unit\
+	Server() 
+\f1 \uc0\u8801 
+\f0  let r = request in cs[c] ! r specificAction() end server()\
+\
+	System: Unit -> Unit\
+	System() 
+\f1 \uc0\u8801 
+\f0  (Clients() | x \{1\'85n\}) || Servers() | x\{1\'85m\}\
+\
+\
+\
+\
+\
+\
+\
+}
